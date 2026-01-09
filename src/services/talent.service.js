@@ -5,7 +5,18 @@ import supabase from './supabaseClient'
  */
 export async function createTalent(talentData) {
     try {
-        const { pilihan, crewPositions, artistData, ...baseData } = talentData
+        const {
+            pilihan,
+            crewPositions,
+            artistData,
+            // Crew specific fields to exclude from baseData
+            pernah_terlibat,
+            judul_film,
+            peran_di_film,
+            genre_film,
+            minat_kontribusi,
+            ...baseData
+        } = talentData
 
         // 1. Insert ke tabel talents
         const { data: talent, error: talentError } = await supabase
@@ -18,9 +29,16 @@ export async function createTalent(talentData) {
 
         // 2. Jika CREW, insert ke talent_crews
         if (pilihan === 'CREW' && crewPositions && crewPositions.length > 0) {
+
+
             const crewData = crewPositions.map(positionId => ({
                 talent_id: talent.id,
-                crew_position_id: positionId
+                crew_position_id: positionId,
+                pernah_terlibat: pernah_terlibat || false,
+                judul_film: judul_film || null,
+                peran_di_film: peran_di_film || null,
+                genre_film: genre_film || null,
+                minat_kontribusi: minat_kontribusi || null
             }))
 
             const { error: crewError } = await supabase
@@ -61,6 +79,11 @@ export async function getTalents(filters = {}) {
         cluster:clusters(id, name, code),
         talent_crews(
           id,
+          pernah_terlibat,
+          judul_film,
+          peran_di_film,
+          genre_film,
+          minat_kontribusi,
           crew_position:crew_positions(id, name)
         ),
         talent_artists(*)
@@ -100,6 +123,11 @@ export async function getTalentById(id) {
         cluster:clusters(id, name, code),
         talent_crews(
           id,
+          pernah_terlibat,
+          judul_film,
+          peran_di_film,
+          genre_film,
+          minat_kontribusi,
           crew_position:crew_positions(id, name)
         ),
         talent_artists(*)

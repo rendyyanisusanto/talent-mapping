@@ -124,7 +124,10 @@
                     Persyaratan Keanggotaan
                   </h4>
                   <p class="text-gray-700 dark:text-gray-300 mb-3">
-                    Pastikan Anda telah terdaftar sebagai <strong>MEMBER Kinarya Coop</strong> untuk melanjutkan.
+                    Gabung sebagai Member Kinarya Coop (kami menyebutnya <strong>KINARYA CREW</strong>) untuk lanjut.
+                  </p>
+                  <p class="text-gray-700 dark:text-gray-300 mb-3">
+                    Sebagai <strong>KINARYA CREW</strong>, kamu otomatis jadi <strong>FILM-Preneur</strong>: bisa ikut berperan dalam film, mendukung proses produksi, dan jadi bagian dari ekosistem film berdampak untuk masa depan.
                   </p>
                   <a
                     href="https://onemangrove.com/home/indo"
@@ -148,7 +151,7 @@
                     class="mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary focus:ring-offset-0"
                   />
                   <span class="flex-1 text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                    Saya menyetujui bahwa data yang saya berikan adalah benar dan saya telah terdaftar sebagai Member Kinarya Coop. Saya siap untuk dihubungi oleh tim Kinarya untuk proses selanjutnya.
+                    Saya siap menjadi Film-Preneur, ikut memiliki peran dan partisipasi dalam film-film produksi Kinarya, serta terlibat aktif dalam ekosistem Kinarya.
                   </span>
                 </label>
                 <p v-if="errors.agreement" class="text-sm text-red-500 flex items-center gap-1 mt-2">

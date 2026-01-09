@@ -38,6 +38,11 @@ export function useTalentForm() {
 
         // Step 3A - Crew (array of position IDs)
         crewPositions: [],
+        pernah_terlibat: null,
+        judul_film: '',
+        peran_di_film: '',
+        genre_film: '',
+        minat_kontribusi: '', // Single selection
 
         // Step 3B - Artist
         berat_badan: null,
@@ -144,11 +149,31 @@ export function useTalentForm() {
 
     // Validate crew step
     function validateCrew() {
+        let isValid = true
+
         if (!formData.crewPositions || formData.crewPositions.length === 0) {
             errors.crewPositions = 'Pilih minimal 1 posisi crew'
-            return false
+            isValid = false
         }
-        return true
+
+        if (formData.pernah_terlibat === null || formData.pernah_terlibat === undefined) {
+            errors.pernah_terlibat = 'Pilih apakah pernah terlibat dalam pembuatan film'
+            isValid = false
+        }
+
+        // Conditional validation: if pernah_terlibat is true, film details are required
+        if (formData.pernah_terlibat === true) {
+            if (!formData.judul_film.trim()) {
+                errors.judul_film = 'Judul film wajib diisi'
+                isValid = false
+            }
+            if (!formData.peran_di_film.trim()) {
+                errors.peran_di_film = 'Peran di film wajib diisi'
+                isValid = false
+            }
+        }
+
+        return isValid
     }
 
     // Validate artist step
@@ -201,6 +226,11 @@ export function useTalentForm() {
             // Add crew or artist specific data
             if (formData.pilihan === AppConfig.JALUR.CREW) {
                 talentData.crewPositions = formData.crewPositions
+                talentData.pernah_terlibat = formData.pernah_terlibat
+                talentData.judul_film = formData.judul_film
+                talentData.peran_di_film = formData.peran_di_film
+                talentData.genre_film = formData.genre_film
+                talentData.minat_kontribusi = formData.minat_kontribusi
             } else if (formData.pilihan === AppConfig.JALUR.ARTIS) {
                 talentData.artistData = {
                     berat_badan: formData.berat_badan,

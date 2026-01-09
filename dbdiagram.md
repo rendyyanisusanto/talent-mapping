@@ -45,6 +45,12 @@ Table talent_crews {
   id bigint [pk, increment]
   talent_id bigint [ref: > talents.id]
   crew_position_id bigint [ref: > crew_positions.id]
+
+  pernah_terlibat boolean
+  judul_film text
+  peran_di_film text
+  genre_film text
+  minat_kontribusi text
 }
 
 Table talent_artists {

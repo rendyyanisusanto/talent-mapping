@@ -174,6 +174,55 @@
                   </div>
                 </div>
 
+                <!-- Crew Experience Details -->
+                <div v-if="talent.pilihan === 'CREW' && talent.talent_crews?.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6">
+                  <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">history_edu</span>
+                    Pengalaman & Minat Film
+                  </h3>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold flex items-center gap-1 mb-1">
+                        <span class="material-symbols-outlined text-sm">movie</span>
+                        Pernah Terlibat Produksi Film
+                      </label>
+                      <p class="text-gray-900 dark:text-white font-medium">
+                        {{ talent.talent_crews[0].pernah_terlibat ? 'Ya' : 'Belum pernah' }}
+                      </p>
+                    </div>
+                    <div v-if="talent.talent_crews[0].pernah_terlibat && talent.talent_crews[0].judul_film">
+                      <label class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold flex items-center gap-1 mb-1">
+                        <span class="material-symbols-outlined text-sm">theaters</span>
+                        Judul Film
+                      </label>
+                      <p class="text-gray-900 dark:text-white font-medium">{{ talent.talent_crews[0].judul_film }}</p>
+                    </div>
+                    <div v-if="talent.talent_crews[0].pernah_terlibat && talent.talent_crews[0].peran_di_film">
+                      <label class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold flex items-center gap-1 mb-1">
+                        <span class="material-symbols-outlined text-sm">badge</span>
+                        Peran di Film
+                      </label>
+                      <p class="text-gray-900 dark:text-white font-medium">{{ talent.talent_crews[0].peran_di_film }}</p>
+                    </div>
+                    <div v-if="talent.talent_crews[0].genre_film">
+                      <label class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold flex items-center gap-1 mb-1">
+                        <span class="material-symbols-outlined text-sm">category</span>
+                        Genre Film Diminati
+                      </label>
+                      <p class="text-gray-900 dark:text-white font-medium">{{ talent.talent_crews[0].genre_film }}</p>
+                    </div>
+                    <div v-if="talent.talent_crews[0].minat_kontribusi" class="md:col-span-2">
+                      <label class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold flex items-center gap-1 mb-2">
+                        <span class="material-symbols-outlined text-sm">favorite</span>
+                        Minat Kontribusi
+                      </label>
+                      <span class="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-medium">
+                        {{ talent.talent_crews[0].minat_kontribusi }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Artist Details -->
                 <div v-if="talent.pilihan === 'ARTIS' && talent.talent_artists?.length > 0" class="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-6">
                   <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
