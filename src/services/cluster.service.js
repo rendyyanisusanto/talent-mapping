@@ -1,97 +1,41 @@
-import supabase from './supabaseClient'
+import apiClient from './apiClient'
 
 /**
- * Get all active clusters
+ * Get clusters (defaults to all active, or pass { all: true } for all)
  */
-export async function getClusters() {
-    try {
-        const { data, error } = await supabase
-            .from('clusters')
-            .select('*')
-            .eq('is_active', true)
-            .order('name', { ascending: true })
-
-        if (error) throw error
-        return { data, error: null }
-    } catch (error) {
-        console.error('Error fetching clusters:', error)
-        return { data: null, error }
-    }
+export async function getClusters(params = {}) {
+    const query = new URLSearchParams()
+    if (params.all) query.append('all', 'true')
+    if (params.is_active !== undefined) query.append('is_active', params.is_active)
+    
+    const queryString = query.toString() ? `?${query.toString()}` : ''
+    return apiClient.get(`/clusters${queryString}`)
 }
 
 /**
- * Get cluster by code (untuk URL parameter)
+ * Get cluster by code (untuk URL parameter pendaftaran /:cluster)
  */
 export async function getClusterByCode(code) {
-    try {
-        const { data, error } = await supabase
-            .from('clusters')
-            .select('*')
-            .eq('code', code)
-            .eq('is_active', true)
-            .single()
-
-        if (error) throw error
-        return { data, error: null }
-    } catch (error) {
-        console.error('Error fetching cluster by code:', error)
-        return { data: null, error }
-    }
+    return apiClient.get(`/clusters/${encodeURIComponent(code)}`)
 }
 
 /**
  * Create new cluster (admin only)
  */
 export async function createCluster(clusterData) {
-    try {
-        const { data, error } = await supabase
-            .from('clusters')
-            .insert([clusterData])
-            .select()
-            .single()
-
-        if (error) throw error
-        return { data, error: null }
-    } catch (error) {
-        console.error('Error creating cluster:', error)
-        return { data: null, error }
-    }
+    return apiClient.post('/clusters', clusterData)
 }
 
 /**
  * Update cluster (admin only)
  */
 export async function updateCluster(id, clusterData) {
-    try {
-        const { data, error } = await supabase
-            .from('clusters')
-            .update(clusterData)
-            .eq('id', id)
-            .select()
-            .single()
-
-        if (error) throw error
-        return { data, error: null }
-    } catch (error) {
-        console.error('Error updating cluster:', error)
-        return { data: null, error }
-    }
+    return apiClient.put(`/clusters/${id}`, clusterData)
 }
 
 /**
  * Delete cluster (admin only)
  */
 export async function deleteCluster(id) {
-    try {
-        const { error } = await supabase
-            .from('clusters')
-            .delete()
-            .eq('id', id)
-
-        if (error) throw error
-        return { error: null }
-    } catch (error) {
-        console.error('Error deleting cluster:', error)
-        return { error }
-    }
+    return apiClient.delete(`/clusters/${id}`)
 }

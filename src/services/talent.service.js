@@ -1,66 +1,13 @@
-import supabase from './supabaseClient'
+import apiClient from './apiClient'
 
 /**
  * Create new talent with crew or artist data
  */
 export async function createTalent(talentData) {
     try {
-        const {
-            pilihan,
-            crewPositions,
-            artistData,
-            // Crew specific fields to exclude from baseData
-            pernah_terlibat,
-            judul_film,
-            peran_di_film,
-            genre_film,
-            minat_kontribusi,
-            ...baseData
-        } = talentData
-
-        // 1. Insert ke tabel talents
-        const { data: talent, error: talentError } = await supabase
-            .from('talents')
-            .insert([{ ...baseData, pilihan }])
-            .select()
-            .single()
-
-        if (talentError) throw talentError
-
-        // 2. Jika CREW, insert ke talent_crews
-        if (pilihan === 'CREW' && crewPositions && crewPositions.length > 0) {
-
-
-            const crewData = crewPositions.map(positionId => ({
-                talent_id: talent.id,
-                crew_position_id: positionId,
-                pernah_terlibat: pernah_terlibat || false,
-                judul_film: judul_film || null,
-                peran_di_film: peran_di_film || null,
-                genre_film: genre_film || null,
-                minat_kontribusi: minat_kontribusi || null
-            }))
-
-            const { error: crewError } = await supabase
-                .from('talent_crews')
-                .insert(crewData)
-
-            if (crewError) throw crewError
-        }
-
-        // 3. Jika ARTIS, insert ke talent_artists
-        if (pilihan === 'ARTIS' && artistData) {
-            const { error: artistError } = await supabase
-                .from('talent_artists')
-                .insert([{
-                    talent_id: talent.id,
-                    ...artistData
-                }])
-
-            if (artistError) throw artistError
-        }
-
-        return { data: talent, error: null }
+        const res = await apiClient.post('/talents', talentData)
+        if (res.error) throw res.error
+        return { data: res.data, error: null }
     } catch (error) {
         console.error('Error creating talent:', error)
         return { data: null, error }
@@ -72,39 +19,17 @@ export async function createTalent(talentData) {
  */
 export async function getTalents(filters = {}) {
     try {
-        let query = supabase
-            .from('talents')
-            .select(`
-        *,
-        cluster:clusters(id, name, code),
-        talent_crews(
-          id,
-          pernah_terlibat,
-          judul_film,
-          peran_di_film,
-          genre_film,
-          minat_kontribusi,
-          crew_position:crew_positions(id, name)
-        ),
-        talent_artists(*)
-      `)
-            .order('created_at', { ascending: false })
+        const query = new URLSearchParams()
+        if (filters.cluster_id) query.append('cluster_id', filters.cluster_id)
+        if (filters.pilihan) query.append('pilihan', filters.pilihan)
+        if (filters.search) query.append('search', filters.search)
+        if (filters.limit) query.append('limit', filters.limit)
 
-        // Apply filters
-        if (filters.cluster_id) {
-            query = query.eq('cluster_id', filters.cluster_id)
-        }
-        if (filters.pilihan) {
-            query = query.eq('pilihan', filters.pilihan)
-        }
-        if (filters.search) {
-            query = query.or(`nama.ilike.%${filters.search}%,email.ilike.%${filters.search}%`)
-        }
+        const queryString = query.toString() ? `?${query.toString()}` : ''
+        const res = await apiClient.get(`/talents${queryString}`)
 
-        const { data, error } = await query
-
-        if (error) throw error
-        return { data, error: null }
+        if (res.error) throw res.error
+        return { data: res.data, error: null }
     } catch (error) {
         console.error('Error fetching talents:', error)
         return { data: null, error }
@@ -116,27 +41,9 @@ export async function getTalents(filters = {}) {
  */
 export async function getTalentById(id) {
     try {
-        const { data, error } = await supabase
-            .from('talents')
-            .select(`
-        *,
-        cluster:clusters(id, name, code),
-        talent_crews(
-          id,
-          pernah_terlibat,
-          judul_film,
-          peran_di_film,
-          genre_film,
-          minat_kontribusi,
-          crew_position:crew_positions(id, name)
-        ),
-        talent_artists(*)
-      `)
-            .eq('id', id)
-            .single()
-
-        if (error) throw error
-        return { data, error: null }
+        const res = await apiClient.get(`/talents/${id}`)
+        if (res.error) throw res.error
+        return { data: res.data, error: null }
     } catch (error) {
         console.error('Error fetching talent:', error)
         return { data: null, error }
@@ -148,12 +55,9 @@ export async function getTalentById(id) {
  */
 export async function getTalentCount() {
     try {
-        const { count, error } = await supabase
-            .from('talents')
-            .select('*', { count: 'exact', head: true })
-
-        if (error) throw error
-        return { count, error: null }
+        const res = await apiClient.get('/talents/count')
+        if (res.error) throw res.error
+        return { count: res.count ?? res.data?.count ?? 0, error: null }
     } catch (error) {
         console.error('Error counting talents:', error)
         return { count: 0, error }

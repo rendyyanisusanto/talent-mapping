@@ -1,26 +1,24 @@
-import supabase from './supabaseClient'
+import apiClient from './apiClient'
 
 /**
  * Login admin user
  */
 export async function login(email, password) {
     try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
+        const res = await apiClient.post('/auth/login', {
+            email: email.trim(),
             password
         })
 
-        if (error) throw error
+        if (res.error) throw res.error
 
-        // Check if user has admin profile
-        const { data: profile, error: profileError } = await getAdminProfile(data.user.id)
+        const { user, profile, token } = res.data
 
-        if (profileError || !profile) {
-            await supabase.auth.signOut()
-            throw new Error('User is not an admin')
+        if (token) {
+            apiClient.setToken(token)
         }
 
-        return { data: { ...data, profile }, error: null }
+        return { data: { user, profile, token }, error: null }
     } catch (error) {
         console.error('Error logging in:', error)
         return { data: null, error }
@@ -32,50 +30,56 @@ export async function login(email, password) {
  */
 export async function logout() {
     try {
-        const { error } = await supabase.auth.signOut()
-        if (error) throw error
+        await apiClient.post('/auth/logout').catch(() => {})
+        apiClient.clearToken()
         return { error: null }
     } catch (error) {
+        apiClient.clearToken()
         console.error('Error logging out:', error)
         return { error }
     }
 }
 
 /**
- * Get current session
+ * Get current session / user
  */
 export async function getCurrentUser() {
     try {
-        const { data: { session }, error } = await supabase.auth.getSession()
+        const token = apiClient.getToken()
+        if (!token) {
+            return { data: null, error: null }
+        }
 
-        if (error) throw error
-        if (!session) return { data: null, error: null }
+        const res = await apiClient.get('/auth/me')
 
-        // Get admin profile
-        const { data: profile, error: profileError } = await getAdminProfile(session.user.id)
+        if (res.error) {
+            // Token is expired or invalid
+            apiClient.clearToken()
+            return { data: null, error: res.error }
+        }
 
-        if (profileError) throw profileError
-
-        return { data: { user: session.user, profile }, error: null }
+        return {
+            data: {
+                user: res.data.user,
+                profile: res.data.profile
+            },
+            error: null
+        }
     } catch (error) {
+        apiClient.clearToken()
         console.error('Error getting current user:', error)
         return { data: null, error }
     }
 }
 
 /**
- * Get admin profile from admin_profiles table
+ * Get admin profile
  */
 export async function getAdminProfile(userId) {
     try {
-        const { data, error } = await supabase
-            .from('admin_profiles')
-            .select('*')
-            .eq('id', userId)
-            .single()
-
-        if (error) throw error
-        return { data, error: null }
+        const res = await getCurrentUser()
+        if (res.error) throw res.error
+        return { data: res.data?.profile || null, error: null }
     } catch (error) {
         console.error('Error fetching admin profile:', error)
         return { data: null, error }
